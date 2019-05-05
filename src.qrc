@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/img"/>
+    <qresource prefix="/src">
+        <file>img/fuhyo.png</file>
+        <file>img/ginsho.png</file>
+        <file>img/gyokusho.png</file>
+        <file>img/hisha.png</file>
+        <file>img/kakugyo.png</file>
+        <file>img/keima.png</file>
+        <file>img/kinsho.png</file>
+        <file>img/kyosha.png</file>
+        <file>img/narigin.png</file>
+        <file>img/narikei.png</file>
+        <file>img/narikyo.png</file>
+        <file>img/osho.png</file>
+        <file>img/ryuma.png</file>
+        <file>img/ryuo.png</file>
+        <file>img/tokin.png</file>
+        <file>main.cpp</file>
+        <file>mainwindow.cpp</file>
+        <file>mainwindow.h</file>
+        <file>img/board.jpg</file>
+        <file>img/background.jpg</file>
+    </qresource>
+</RCC>
