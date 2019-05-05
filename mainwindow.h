@@ -47,5 +47,5 @@ public slots:
     void drop(int, int);
     void dropSecondClicked(int, int);
 };
-
+//
 #endif // MAINWINDOW_H
