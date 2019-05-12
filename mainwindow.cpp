@@ -46,16 +46,17 @@ void MainWindow::setUp(){
     boardTable->setFocusPolicy(Qt::NoFocus);
     boardTable->setSelectionMode(QAbstractItemView::NoSelection);
     boardTable->setIconSize(QSize(85, 85));
-    //boardTable->setStyleSheet("background-image:url(:/src/img/board.jpg)");
     boardTable->setStyleSheet("QTableWidget{background: transparent;}");
     boardTable->setShowGrid(false);
     boardTable->setFrameStyle(QFrame::NoFrame);
-    //boardTable->setStyleSheet("QTableWidget::item {"" background-image:url(:/src/img/board.jpg);border: 1px inset black;""}");
 
     resetButton = new QPushButton("reset", this);
     resetButton->setGeometry(1100, 0, 50, 50);
     editButton = new QPushButton("edit", this);
     editButton->setGeometry(1150, 0, 50, 50);
+
+    clickType = empty; clickTeam = 0;
+    clickx = 0; clicky = 0;
 
     label[0] = new QLabel(this);
     label[0]->setGeometry(1000, 800, 141, 81);
@@ -94,7 +95,15 @@ void MainWindow::setUp(){
         }
     }
 
-    connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
+    king[0] = new QPushButton(QIcon(pic[osho]), "", this);
+    king[0]->setStyleSheet("QPushButton {background-color:transparent;}");
+    king[0]->setIconSize(QSize(85, 85));
+    king[0]->setGeometry(110, 780, 85, 85);
+    king[1] = new QPushButton(QIcon(pic[gyokusho]), "", this);
+    king[1]->setStyleSheet("QPushButton {background-color:transparent;}");
+    king[1]->setIconSize(QSize(85, 85));
+    king[1]->setGeometry(25, 780, 85, 85);
+
     connect(resetButton, SIGNAL(clicked(bool)), this, SLOT(resetClicked()));
     connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
 }
@@ -117,6 +126,8 @@ void MainWindow::reset(){
             capturebut[i][j]->setText("");
         }
     }
+    king[0]->setIcon(QIcon());
+    king[1]->setIcon(QIcon());
 
     //fuhyo
     for(int j=0; j<9; ++j){
@@ -169,6 +180,7 @@ void MainWindow::reset(){
             setimage(i, j);
         }
     connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
+    connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
     disconnect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(secondClicked(int, int)));
 }
 
@@ -193,11 +205,12 @@ void MainWindow::setmove(int row, int col){
         return;
     else {
         moveBoard[row][col] = moveable;
-        boardTable->item(row, col)->setBackground(Qt::blue);
+        boardTable->item(row, col)->setBackgroundColor(Qt::blue);
     }
 }
 
 void MainWindow::myCellClicked(int row, int col){
+    disconnect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
     if(team[row][col] != round)
         return;
     clickx = row;
@@ -484,6 +497,7 @@ void MainWindow::secondClicked(int row, int col){
                     boardTable->item(i, j)->setBackground(Qt::transparent);
                 }
     }
+    connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
     connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
     disconnect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(secondClicked(int, int)));
 }
@@ -531,6 +545,7 @@ void MainWindow::promotion(int row, int col){
 }
 
 void MainWindow::drop(int i, int j){
+    disconnect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
     clickTeam = i; clickType = j;
     if(bool(clickTeam)!=round)
         return;
@@ -624,6 +639,7 @@ void MainWindow::dropSecondClicked(int row, int col){
                     boardTable->item(i, j)->setBackground(Qt::transparent);
                 }
     }
+    connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
     connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
     disconnect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(dropSecondClicked(int, int)));
 }
@@ -633,5 +649,63 @@ void MainWindow::resetClicked(){
 }
 
 void MainWindow::editClicked(){
+    disconnect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
+    for(int i=0; i<2; ++i){
+        for(int j=0; j<7; ++j){
+            capturebut[i][j]->setIcon(QIcon(pic[j]));
+            capturebut[i][j]->setText("");
+            capturebut[i][j]->disconnect();
+            connect(capturebut[i][j], &QPushButton::clicked, [this, i, j](){putChess(i, j);});
+        }
+    }
 
+    int i=0, j=8;
+    king[0]->setIcon(QIcon(pic[osho]));
+    connect(king[0], &QPushButton::clicked, [this, i, j](){putChess(i, j);});
+    i=1; j=7;
+    king[1]->setIcon(QIcon(pic[gyokusho]));
+    connect(king[1], &QPushButton::clicked, [this, i, j](){putChess(i, j);});
+
+    connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editSecondClicked()));
+    disconnect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
+}
+
+void MainWindow::putChess(int i, int j){
+    clickTeam = i; clickType = j;
+    connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(putChess2(int, int)));
+}
+
+void MainWindow::putChess2(int i, int j){
+    if(board[i][j] == empty){
+        board[i][j] = clickType;
+        team[i][j] = clickTeam;
+        setimage(i, j);
+    }else {
+        board[i][j] = empty;
+        setimage(i, j);
+    }
+}
+
+void MainWindow::editSecondClicked(){
+    for(int i=0; i<2; ++i){
+        for(int j=0; j<7; ++j){
+            capturebut[i][j]->disconnect();
+            connect(capturebut[i][j], &QPushButton::clicked, [this, i, j](){drop(i, j);});
+            if(captureChess[i][j]>0){
+                capturebut[i][j]->setIcon(QIcon(pic[j]));
+                capturebut[i][j]->setText(QString::number(captureChess[i][j]));
+            }else {
+                capturebut[i][j]->setIcon(QIcon());
+            }
+        }
+    }
+    king[0]->disconnect();
+    king[0]->setIcon(QIcon());
+    king[1]->disconnect();
+    king[1]->setIcon(QIcon());
+
+    connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editClicked()));
+    connect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(myCellClicked(int, int)));
+    disconnect(boardTable, SIGNAL(cellClicked(int, int)), this, SLOT(putChess2(int, int)));
+    disconnect(editButton, SIGNAL(clicked(bool)), this, SLOT(editSecondClicked()));
 }

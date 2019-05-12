@@ -37,6 +37,7 @@ private:
     bool round;
     void promotion(int, int);
     QPushButton *capturebut[2][7];
+    QPushButton *king[2];
     QLabel *label[2];
 
 public slots:
@@ -44,8 +45,11 @@ public slots:
     void secondClicked(int, int);
     void resetClicked();
     void editClicked();
+    void editSecondClicked();
+    void putChess(int, int);
+    void putChess2(int, int);
     void drop(int, int);
     void dropSecondClicked(int, int);
 };
-//
+
 #endif // MAINWINDOW_H
